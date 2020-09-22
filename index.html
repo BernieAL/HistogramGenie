@@ -31,39 +31,56 @@
 
           <br><br>
     <!-- End NAV-->
-<!--
-    <div id="form-div">
-      <form>
-        <span></span>
-        <input type="file" placeholder="Upload Image here" class="type">
-        <img src="" id="preview" alt="image preview">
-      </form>
-  </div>
--->
 
-  <form action="#">
-    <div class="file-field input-field">
-      <div class="btn">
-        <span>File</span>
-        <input type="file">
+
+
+
+<!-- FORM DIV -->
+<div class="form-div">
+    <form action="#">
+      <div class="file-field input-field">
+        <div class="btn">
+          <span>File</span>
+          <input type="file">
+        </div>
+        <div class="file-path-wrapper">
+          <input class="file-path validate" type="text">
+        </div>
       </div>
-      <div class="file-path-wrapper">
-        <input class="file-path validate" type="text">
+      <div id="submit-button">
+        <button class="btn waves-effect waves-light right" type="submit" name="action">Submit
+          <i class="material-icons right"></i>
+        </button>
       </div>
-    </div>
-    <div id="submit-button">
-      <button class="btn waves-effect waves-light right" type="submit" name="action">Submit
-        <i class="material-icons right"></i>
-      </button>
-    </div>
+    </form>
+
+    <form action='#'>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea id="textarea2" class="materialize-textarea" data-length="120"></textarea>
+          <label for="textarea2">ENTER URL HERE..</label>
+        </div>
+        <div id="get-Button">
+          <button class="btn waves-effect waves-light right" type="submit" name="action">GET
+            <i class="material-icons right"></i>
+          </button>
+        </div>
+      </div>
+      
   </form>
+</div>
+<!--END FORM DIV-->
 
-        
+<br></br>
 
-  <div>
+<!-- IMAGE PREVIEW DIV -->
+  <div id="image-preview-div">
     <img src=""id="preview">
   </div>
-   
+ 
+<div id="graph">
+    <canvas id="graph"></canvas>
+</div>
   
 
   <!--  END main Container -->  

@@ -29,37 +29,18 @@ window.onload = ()=>{
             
         }
     })
-    
 //=============================================================
     /* Handle URL submission */
 
-    /*
-    const getButton = document.querySelector('#getButton')
-    getButton.addEventListener('click',()=>{
+    
+    const getButton = document.querySelector('#get-Button')
+    getButton.addEventListener('click',(e)=>{
+        e.preventDefault();
         alert('GET button clicked')
     })
-    */
+    
 //==============================================================
-/*
-function showImage(fileReader){
-    var img = document.querySelector('#preview')
-    img.onload = ()=>{
-        //getImageData(img);
-        //console.log()
-        img.src = fileReader.result;
-    }
-}
-*/
 
-
-/*
-function getImageData(img){
-    ctx.drawImage(img,0,0);
-    imageData = ctx.getImageData(0,0,img.width,img.height).data;
-    console.log("image data:", imageData)
-    return imageData;
-}
-*/
 
 }
 
