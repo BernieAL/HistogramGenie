@@ -2,6 +2,10 @@
     when you upload a new picture its values are being added to the previous images values
         the new is being added to the old.
             Need to find a way to reset the array values before a new image is read
+
+    when trying to get the percent of a color by diviing the color array by the image data,
+        i was not considering that the image data array format is RGBA which is 4 values
+    
 */
 
 
@@ -10,6 +14,7 @@ window.onload = ()=>{
     let redArray = [];
     let blueArray = [];
     let greenArray= [];
+    let alphaArray = [];
     let blackArray = [];
     
     var canvas = document.createElement('canvas')
@@ -34,17 +39,18 @@ window.onload = ()=>{
                 //call to get image Data
                     imageData = getData(ctx,img)
                     console.log("Image data:", imageData)   
-                    console.log("image Data length " + imageData.length)
+                    console.log("image Data length (raw: r,g,b,a): " + imageData.length)
+                    console.log("image pixel count (image data / 4): " + (imageData.length / 4 ))
                
                 //call to getColors
                     getColors(imageData)
-                    console.log("red array length: " + redArray.length)
-                    console.log("Green array length " + greenArray.length)
-                    console.log("blue array length " + blueArray.length);
-                    console.log("black array length " + blackArray.length)
+                    //console.log("red array length: " + redArray.length)
+                    //console.log("Green array length " + greenArray.length)
+                    //console.log("blue array length " + blueArray.length);
+                    //console.log("black array length " + blackArray.length)
 
                 // call to graph function
-                    graph(redArray,greenArray,blueArray,blackArray)
+                    graph(redArray,greenArray,blueArray,blackArray,imageData)
             }
             img.src = reader.result
             preview.setAttribute('src',img.src)
@@ -78,7 +84,9 @@ window.onload = ()=>{
     })
     
 //==============================================================
-    /*Function to get image data using canvas */
+/*Function to get image data using canvas */
+
+/* CONSIDER MAKING THIS ASYNCHRONOUS OR USING ONLOAD FOR CANVAS */
     function getData(ctx,img){
         ctx = canvas.getContext('2d')
         ctx.drawImage(img,0,0)
@@ -92,65 +100,84 @@ const getColors = function(imgData){
      //var data = imgData.data
      //console.log(data)
     
-
-//resetting arrays to 0 so that the old values are removed and not added with the new image data     
-redArray.length = 0;
-greenArray.length = 0;
-blueArray.length = 0;
-blackArray.length = 0;
+    /*RESETTING ARRAYS TO 0 SO THAT OLD VALUES ARE REMOVES AND NOT ADDED 
+        TOGETHER WITH NEW IMAGE DATA ON NEW FUNCTION CALL */
+    redArray.length = 0;
+    greenArray.length = 0;
+    blueArray.length = 0;
+    alphaArray.length = 0;
+    blackArray.length = 0;
    
 
     data = imgData;
-    var blackCount; 
-    //if blackCount == 3, this means red=0,green=0,blue=0 for a pixel making the pixel black
 
-    for(i = 0; i<data.length; i+=4){
-            
-        var red = data[i]
+    var blackCount = 0;
+
+    /* IMPORTANT: i+=4 because a single pixel is 0,1,2,3 
+        if we are at i = 0 for red value, then we need i+2 to get to blue, and i+3 to take care of the alpha value
+    */
+    for(i = 0; i < data.length; i+=4){ 
+        
+      
+        var red = data[i];
+            //console.log(data[i])
+        var green = data[i+1];
+            //console.log(green)
+        var blue = data[i+2];
+           // console.log(blue)
+        var alpha = data[i+3];
+
         if(red == 0){
             blackCount++;
+    
         } else {
-            redArray.push(red)
+            redArray.push(1) //increment red array to reflect counting a non-zero red value
         }
         
-        var green = data[i+1]
         if(green == 0){
             blackCount++;
         } else {
-            greenArray.push(green)
+            greenArray.push(1)
         }
 
-        var blue = data[i+2]
         if(blue == 0){
             blackCount++;
         } else {
-            blueArray.push(blue)
+            blueArray.push(1)
         }
-        
+
         if(blackCount == 3){
-            black = data[i] //i,i+2,i+3 r,g,b are all black for this pixel
-            blackArray.push(black)
-            //console.log("black count when pushed"+blackCount)
+            //console.log("we have a black pixel")
+            blackArray.push(1);
+            blackCount = 0; //reset blackCounter
         }
-        //reset black count to 0 for next pixel
-        blackCount = 0;
-        //console.log('black count after setting to 0')
-    }   
-    console.log(redArray)
-    console.log(greenArray)
-    console.log(blueArray)
-    console.log(blackArray)
+    }
+    console.log("black array length: " + blackArray.length)
 }
 //====================================================
-const graph = function(redArray,greenArray,blueArray,blackArray){
+const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
+
+   
+    redPercent = Math.round((redArray.length));
+    greenPercent = Math.round((greenArray.length));
+    bluePercent = Math.round((blueArray.length));
+    blackPercent = Math.round((blackArray.length));
+
+/* These are for checking proper lengths being passed in */
+    //console.log("image Data length " + imageData.length)
+    //console.log("red array length: " + redArray.length)
+    //console.log("Green array length " + greenArray.length)
+    //console.log("blue array length " + blueArray.length);
+    //console.log("black array length " + blackArray.length)
+   
 
     if(myChart){
         //if chart exists already, just update, rather than make new, if not, make new
         
-        myChart.data.datasets[0].data[0] = redArray.length;
-        myChart.data.datasets[0].data[1] = greenArray.length;
-        myChart.data.datasets[0].data[2] = blueArray.length;
-        myChart.data.datasets[0].data[3] = blackArray.length;
+        myChart.data.datasets[0].data[0] = redPercent;
+        myChart.data.datasets[0].data[1] = greenPercent;
+        myChart.data.datasets[0].data[2] = bluePercent;
+        myChart.data.datasets[0].data[3] = blackPercent;
         myChart.update();
 
     } else {
@@ -161,7 +188,7 @@ const graph = function(redArray,greenArray,blueArray,blackArray){
             labels: ['Red', 'Green', 'Blue', 'black', 'White'],
             datasets: [{
                 label: '# Pixels',
-                data: [redArray.length, greenArray.length, blueArray.length, blackArray.length, 2],
+                data: [redPercent, greenPercent, bluePercent, blackPercent, 0],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',  //red
                     'rgba(0, 192, 0, 0.2)',     //green
