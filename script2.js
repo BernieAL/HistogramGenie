@@ -8,8 +8,8 @@
     
 */
 
+window.onload = () =>{
 
-window.onload = ()=>{
 
     let redArray = [];
     let blueArray = [];
@@ -17,8 +17,9 @@ window.onload = ()=>{
     let alphaArray = [];
     let blackArray = [];
     
+   
     var canvas = document.createElement('canvas')
-    var ctx = canvas.getContext('2d')
+    //var ctx;
     var imageData;
     var myChart;
 
@@ -36,18 +37,19 @@ window.onload = ()=>{
             const img = new Image();
             img.onload = ()=>{
                 
-                //call to get image Data
-                    imageData = getData(ctx,img)
+                    
+                    imageData = getData(img);
+                    
                     console.log("Image data:", imageData)   
                     console.log("image Data length (raw: r,g,b,a): " + imageData.length)
                     console.log("image pixel count (image data / 4): " + (imageData.length / 4 ))
-               
-                //call to getColors
+                    
+                    //call to getColors
                     getColors(imageData)
-                    //console.log("red array length: " + redArray.length)
-                    //console.log("Green array length " + greenArray.length)
-                    //console.log("blue array length " + blueArray.length);
-                    //console.log("black array length " + blackArray.length)
+                        //console.log("red array length: " + redArray.length)
+                        //console.log("Green array length " + greenArray.length)
+                        //console.log("blue array length " + blueArray.length);
+                        //console.log("black array length " + blackArray.length)
 
                 // call to graph function
                     graph(redArray,greenArray,blueArray,blackArray,imageData)
@@ -59,8 +61,7 @@ window.onload = ()=>{
     })
 //=============================================================
     /* Handle URL submission */
-    
-    const image = document.querySelector('#myImage')
+     const image = document.querySelector('#myImage')
     const getButton = document.querySelector('#get-Button')
     getButton.addEventListener('click',(e)=>{
         e.preventDefault();
@@ -86,10 +87,14 @@ window.onload = ()=>{
 //==============================================================
 /*Function to get image data using canvas */
 
-/* CONSIDER MAKING THIS ASYNCHRONOUS OR USING ONLOAD FOR CANVAS */
-    function getData(ctx,img){
+
+    function getData(img){
+        canvas.height = img.naturalHeight || img.offsetHeight || img.height;
+        canvas.width = img.naturalWidth || img.offsetWidth || img.width;
+        height = canvas.height;
+        width = canvas.width;
         ctx = canvas.getContext('2d')
-        ctx.drawImage(img,0,0)
+        ctx.drawImage(img,0,0)           
         imageData = ctx.getImageData(0,0,img.width,img.height).data
         return imageData;
     }
@@ -146,7 +151,7 @@ const getColors = function(imgData){
             blueArray.push(1)
         }
 
-        if(blackCount == 3){
+        if(blackCount == 3 && (alpha == 255)){
             //console.log("we have a black pixel")
             blackArray.push(1);
             blackCount = 0; //reset blackCounter
@@ -222,13 +227,23 @@ const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
     }
 
 //==============================================================
+
+
 }
-
-
 /* Resources */
 /*
 https://coderwall.com/p/jzdmdq/loading-image-from-local-file-into-javascript-and-getting-pixel-data
 https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
 https://www.youtube.com/watch?v=-AR-6X_98rM&t=397s&ab_channel=KyleRobinsonYoung
 https://developer.mozilla.org/en-US/docs/Web/API/Response
+
+
+**** This fixed the issue of large indexes of imageData all being 0
+https://stackoverflow.com/questions/2541481/get-average-color-of-image-via-javascript
+
+                     canvas.height = img.naturalHeight || img.offsetHeight || img.height;
+                     canvas.width = img.naturalWidth || img.offsetWidth || img.width;
+                     height = canvas.height;
+                     width = canvas.width;
+
 */
