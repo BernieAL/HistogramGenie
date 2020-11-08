@@ -1,8 +1,4 @@
-/*  10-5 Update:
-    when you upload a new picture its values are being added to the previous images values
-        the new is being added to the old.
-            Need to find a way to reset the array values before a new image is read
-
+/* 
     when trying to get the percent of a color by diviing the color array by the image data,
         i was not considering that the image data array format is RGBA which is 4 values
     
@@ -10,6 +6,8 @@
 
 window.onload = () =>{
 
+    //const backgroundColor
+    
 
     let redArray = [];
     let blueArray = [];
@@ -17,6 +15,10 @@ window.onload = () =>{
     let alphaArray = [];
     let blackArray = [];
     
+
+    let redSum =0;
+    let greenSum=0;
+    let blueSum=0;
    
     var canvas = document.createElement('canvas')
     //var ctx;
@@ -46,13 +48,15 @@ window.onload = () =>{
                     
                     //call to getColors
                     getColors(imageData)
-                        //console.log("red array length: " + redArray.length)
-                        //console.log("Green array length " + greenArray.length)
-                        //console.log("blue array length " + blueArray.length);
-                        //console.log("black array length " + blackArray.length)
+                        console.log("red array length: " + redArray.length)
+                        console.log("Green array length " + greenArray.length)
+                        console.log("blue array length " + blueArray.length);
+                        console.log("black array length " + blackArray.length)
+                        console.log("alpha array length " + alphaArray.length)
 
                 // call to graph function
-                    graph(redArray,greenArray,blueArray,blackArray,imageData)
+                    graph(redArray,greenArray,blueArray,blackArray,alphaArray,imageData)
+                    getDominantColor(redArray,redSum,greenArray,greenSum,blueArray,blueSum,alphaArray,imageData);
             }
             img.src = reader.result
             preview.setAttribute('src',img.src)
@@ -99,7 +103,7 @@ window.onload = () =>{
         return imageData;
     }
 //==============================================================
-const getColors = function(imgData){
+const getColors = function(imageData){
 
      //var imgData = context.getImageData(0,0,canvas.clientWidth,canvas.height)
      //var data = imgData.data
@@ -112,11 +116,13 @@ const getColors = function(imgData){
     blueArray.length = 0;
     alphaArray.length = 0;
     blackArray.length = 0;
+    
    
 
-    data = imgData;
+    data = imageData;
 
     var blackCount = 0;
+    var whiteCount = 0;
 
     /* IMPORTANT: i+=4 because a single pixel is 0,1,2,3 
         if we are at i = 0 for red value, then we need i+2 to get to blue, and i+3 to take care of the alpha value
@@ -131,24 +137,25 @@ const getColors = function(imgData){
         var blue = data[i+2];
            // console.log(blue)
         var alpha = data[i+3];
-
+        
         if(red == 0){
             blackCount++;
-    
         } else {
-            redArray.push(1) //increment red array to reflect counting a non-zero red value
+            redArray.push(red) //increment red array to reflect counting a non-zero red value
+            redSum+=red;   //sum all red values to later divide by length of redArray to get avg red value
         }
-        
         if(green == 0){
             blackCount++;
         } else {
-            greenArray.push(1)
+            greenArray.push(green)
+            greenSum+=green;
         }
 
         if(blue == 0){
             blackCount++;
         } else {
-            blueArray.push(1)
+            blueArray.push(blue)
+            blueSum+=blue;
         }
 
         if(blackCount == 3 && (alpha == 255)){
@@ -156,17 +163,21 @@ const getColors = function(imgData){
             blackArray.push(1);
             blackCount = 0; //reset blackCounter
         }
+        if(red == 255 && (green == 255) && (blue == 255) && (alpha == 255)){
+            alphaArray.push(1)
+        }
     }
     console.log("black array length: " + blackArray.length)
 }
 //====================================================
-const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
+const graph = function(redArray,greenArray,blueArray,blackArray,alphaArray,imageData){
 
    
-    redPercent = Math.round((redArray.length));
-    greenPercent = Math.round((greenArray.length));
-    bluePercent = Math.round((blueArray.length));
-    blackPercent = Math.round((blackArray.length));
+    redPercent =(redArray.length);
+    greenPercent = (greenArray.length);
+    bluePercent = (blueArray.length);
+    blackPercent = (blackArray.length);
+    alphaPercent = alphaArray.length;
 
 /* These are for checking proper lengths being passed in */
     //console.log("image Data length " + imageData.length)
@@ -183,6 +194,7 @@ const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
         myChart.data.datasets[0].data[1] = greenPercent;
         myChart.data.datasets[0].data[2] = bluePercent;
         myChart.data.datasets[0].data[3] = blackPercent;
+        myChart.data.datasets[0].data[4] = alphaPercent;
         myChart.update();
 
     } else {
@@ -193,7 +205,7 @@ const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
             labels: ['Red', 'Green', 'Blue', 'black', 'White'],
             datasets: [{
                 label: '# Pixels',
-                data: [redPercent, greenPercent, bluePercent, blackPercent, 0],
+                data: [redPercent, greenPercent, bluePercent, blackPercent, alphaPercent],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',  //red
                     'rgba(0, 192, 0, 0.2)',     //green
@@ -224,10 +236,24 @@ const graph = function(redArray,greenArray,blueArray,blackArray,imageData){
     });
         
     }
-    }
+
+}
 
 //==============================================================
+const getDominantColor = function(redArray,redSum,greenArray,greenSum,blueArray,blueSum,alphaArray,imageData){
+    avgRed = Math.round(redSum/imageData.length);
+    avgGreen = Math.round(greenSum/imageData.length );
+    avgBlue = Math.round(blueSum/imageData.length);
+    avgAlpha = Math.floor(alphaArray.length / imageData.length);
 
+    console.log("avg red"+ avgRed);
+    console.log("avg green" + avgGreen)
+    console.log("avg blue" + avgBlue)
+    const defaultRgb = [avgRed,avgGreen,avgBlue];
+    document.querySelector('#dom-color-header-text').innerText ='DOMINANT COLOR' + '('+ avgRed + "," + avgGreen + ',' + avgBlue + ')' ;
+    document.querySelector('#dominant-Color-display').style.backgroundColor="rgb(" + avgRed + "," + avgGreen + "," + avgBlue + ")";
+    //document.querySelector('#dominant-Color-display').style.backgroundColor = rgb(avgRed,avgGreen,avgBlue);
+}
 
 }
 /* Resources */
